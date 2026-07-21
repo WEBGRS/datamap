@@ -10,7 +10,9 @@
     "data": "node build/build-data.cjs && node build/build-samples.mjs",
     "check": "node build/check-ramps.mjs",
     "test": "node build/smoke.mjs",
+    "regress": "node build/regress.mjs",
     "overflow": "node build/overflow.mjs",
+    "docshots": "node build/docshots.mjs",
     "rebuild": "npm run fetch && npm run data && npm run check"
   },
   "dependencies": {

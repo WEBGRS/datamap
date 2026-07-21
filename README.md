@@ -108,6 +108,7 @@ npm run fetch     # 下载上游原始数据（World Bank / Census / Wikipedia /
 npm run data      # 生成 data/*.json 与 src/samples.js
 npm run check     # 校验所有色阶：亮度单调、相邻 ΔE、CVD 分离度
 npm run test      # Playwright 冒烟测试：全部示例 + 全部控件 + 导出 + 窄屏
+npm run regress   # 回归测试：多列切换、刷新持久化、清空、连续色阶、发散分布
 ```
 
 `npm run check` 对 7 种色相 × 2 主题 × 3 级数共 42 条顺序色阶

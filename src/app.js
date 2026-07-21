@@ -134,11 +134,12 @@ async function detectMap(parsed, keyIndex) {
   const probe = parsed.rows.slice(0, 80).map((r) => r[keyIndex]).filter((k) => k != null && String(k).trim() !== "");
   if (probe.length < 3) return null;
   const score = async (key) => {
-    if (!geoCache.has(key)) {
+    if (geoCache.has(key)) indexCache.set(key, geoCache.get(key).index);
+    else if (!indexCache.has(key)) {
       const def = MAPS[key];
       const regions = await fetch(def.regions).then((r) => r.json());
       indexCache.set(key, buildIndex(regions, { idWidth: def.idWidth }));
-    } else indexCache.set(key, geoCache.get(key).index);
+    }
     const idx = indexCache.get(key);
     return probe.filter((p) => resolve(idx, p).id).length / probe.length;
   };
@@ -167,7 +168,7 @@ async function onDataChanged() {
     autoNote = `已自动切换到「${MAPS[target].label}」`;
   } else autoNote = "";
   S._autoCols = true;
-  refresh(true);
+  refresh();
 }
 
 // ---------------------------------------------------------------- pipeline
@@ -544,7 +545,7 @@ function buildPanel() {
   const group = (title, ...kids) => el("section", { class: "group" }, el("h2", {}, title), ...kids);
 
   // --- map ---
-  const mapSel = el("select", { id: "mapSel", onchange: async (e) => { S.map = e.target.value; selected = null; await ensureGeo(); S._autoCols = true; refresh(true); } },
+  const mapSel = el("select", { id: "mapSel", onchange: async (e) => { S.map = e.target.value; selected = null; await ensureGeo(); S._autoCols = true; refresh(); } },
     ...Object.entries(MAPS).map(([k, m]) => opt(k, m.label, S.map)));
   const projSel = el("select", { onchange: (e) => { S.projection = e.target.value; refresh(); } },
     ...Object.entries(PROJECTIONS).map(([k, m]) => opt(k, m.label, S.projection)));
@@ -568,7 +569,7 @@ function buildPanel() {
       mapSel.value = S.map;
       $("#raw").value = S.raw;
       syncInputs();
-      ensureGeo().then(() => refresh(true));
+      ensureGeo().then(() => refresh());
     },
   }, opt("", "— 选择示例 Sample —", ""), ...Object.entries(SAMPLES).map(([k, s]) => opt(k, s.label, S.sample)));
 
@@ -586,8 +587,8 @@ function buildPanel() {
       onDataChanged();
     } });
 
-  const keySel = el("select", { id: "keySel", onchange: (e) => { S.keyIndex = +e.target.value; refresh(true); } });
-  const valSel = el("select", { id: "valSel", onchange: (e) => { S.valueIndex = +e.target.value; refresh(true); } });
+  const keySel = el("select", { id: "keySel", onchange: (e) => { S.keyIndex = +e.target.value; refresh(); } });
+  const valSel = el("select", { id: "valSel", onchange: (e) => { S.valueIndex = +e.target.value; refresh(); } });
 
   // --- color ---
   const kindSeg = el("div", { class: "seg" },
@@ -642,7 +643,7 @@ function buildPanel() {
       field("粘贴数据 Paste", raw),
       el("div", { class: "btn-row" },
         el("button", { class: "btn", type: "button", onclick: () => $("#file").click() }, "上传文件"),
-        el("button", { class: "btn ghost", type: "button", onclick: () => { S.raw = ""; $("#raw").value = ""; autoNote = ""; refresh(true); } }, "清空"),
+        el("button", { class: "btn ghost", type: "button", onclick: () => { S.raw = ""; $("#raw").value = ""; autoNote = ""; refresh(); } }, "清空"),
         fileBtn),
       el("div", { class: "row", style: "margin-top:10px" },
         field("地区列 Region", keySel),
@@ -710,10 +711,10 @@ function applyTheme() {
 }
 
 // ---------------------------------------------------------------- refresh
-function refresh(recomputeCols = false) {
+function refresh() {
   if (!geo) return;
   compute();
-  if (recomputeCols || $("#keySel").options.length !== view.parsed.columns.length) syncColumnPickers();
+  syncColumnPickers();
   renderMap();
   renderLegend();
   renderTiles();
@@ -767,9 +768,11 @@ async function boot() {
     S.center = s.center ?? 0; S.decimals = s.decimals ?? "";
     $("#raw").value = S.raw;
     $("#mapSel").value = S.map;
+    // Only the freshly-loaded sample needs column guessing; a restored session
+    // already carries the user's own choice.
+    S._autoCols = true;
   }
-  S._autoCols = true;
   await ensureGeo();
-  refresh(true);
+  refresh();
 }
 boot();
