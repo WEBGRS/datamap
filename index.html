@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DataMap 数据地图 · 任意数据 → 分级统计地图</title>
+<meta name="description" content="粘贴任意「地区 + 数值」数据，生成美国各州 / 各县 / 世界各国的分级统计地图（choropleth）。">
+<link rel="stylesheet" href="src/styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Crect x='5' y='16' width='7' height='11' rx='1.5' fill='%23cde2fb'/%3E%3Crect x='13' y='10' width='7' height='17' rx='1.5' fill='%2386b6ef'/%3E%3Crect x='21' y='5' width='7' height='22' rx='1.5' fill='%23fcfcfb'/%3E%3C/svg%3E">
+</head>
+<body>
+<div class="app">
+  <aside class="panel" id="panel"></aside>
+
+  <main class="stage">
+    <div class="stage-head">
+      <div class="titles">
+        <input id="chartTitle" placeholder="图表标题 Chart title" aria-label="图表标题">
+        <input id="chartSub" placeholder="副标题 / 说明 Subtitle" aria-label="副标题">
+      </div>
+      <div class="toolbar">
+        <button class="btn" id="btnPNG" type="button">PNG</button>
+        <button class="btn" id="btnSVG" type="button">SVG</button>
+        <button class="btn" id="btnCSV" type="button">CSV</button>
+      </div>
+    </div>
+
+    <dl class="tiles" id="tiles"></dl>
+
+    <div class="card" id="mapWrap"></div>
+
+    <div class="legend" id="legend"></div>
+
+    <div class="foot">
+      <input id="sourceInput" placeholder="数据来源 Source（可选）" aria-label="数据来源">
+    </div>
+
+    <details class="tableview" id="tableView">
+      <summary>表格视图 Table view <em id="tableCount"></em></summary>
+      <div id="tableHost"></div>
+    </details>
+  </main>
+</div>
+
+<script src="vendor/d3.min.js"></script>
+<script src="vendor/topojson-client.min.js"></script>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "datamap",
+  "version": "1.0.0",
+  "description": "Paste any region + value data, get a colour-coded choropleth map. US states, US counties, world countries.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "node build/serve.cjs",
+    "fetch": "node build/fetch-sources.mjs",
+    "data": "node build/build-data.cjs && node build/build-samples.mjs",
+    "check": "node build/check-ramps.mjs",
+    "test": "node build/smoke.mjs",
+    "overflow": "node build/overflow.mjs",
+    "rebuild": "npm run fetch && npm run data && npm run check"
+  },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "topojson-client": "^3.1.0",
+    "us-atlas": "^3.0.1",
+    "world-atlas": "^2.0.2"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}

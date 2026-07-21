@@ -1,0 +1,10 @@
+node_modules/
+shots/
+
+# Raw upstream sources — re-fetch with `npm run fetch`
+build/iso3166.json
+build/wiki_gdp.json
+build/wiki_pop.json
+build/wb_*.json
+build/co-est.csv
+build/census_pop.json
