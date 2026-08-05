@@ -101,15 +101,71 @@ const load = () => {
 const effMode = () =>
   S.theme === "auto" ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : S.theme;
 
+// ---------------------------------------------------------------- loading UI
+// Basemaps are 250-750KB. On a slow link that is tens of seconds, so the wait
+// needs a visible, progressing indicator or the map just looks frozen.
+function showLoading(label) {
+  const host = $("#mapWrap");
+  if (!host || $("#loading")) return;
+  host.append(el("div", { id: "loading", class: "loading" },
+    el("div", { class: "spinner" }),
+    el("div", { class: "loading-text" }, `正在加载${label}底图…`),
+    el("div", { class: "loading-bar" }, el("i", {})),
+    el("div", { class: "loading-pct" }, "")));
+}
+function setLoadingProgress(pct) {
+  const bar = $("#loading .loading-bar i"), out = $("#loading .loading-pct");
+  if (!bar) return;
+  if (pct == null) { bar.style.width = "100%"; bar.classList.add("indeterminate"); if (out) out.textContent = "…"; return; }
+  bar.style.width = Math.round(pct * 100) + "%";
+  if (out) out.textContent = Math.round(pct * 100) + "%";
+}
+const hideLoading = () => $("#loading")?.remove();
+
+/** fetch + JSON parse with download progress when the server sends a length. */
+async function fetchJSON(url, onProgress) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${res.status} ${url}`);
+  const total = Number(res.headers.get("content-length")) || 0;
+  if (!res.body || !total) { onProgress?.(null); return res.json(); }
+  const reader = res.body.getReader();
+  const chunks = [];
+  let got = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    got += value.length;
+    onProgress?.(Math.min(1, got / total));
+  }
+  const buf = new Uint8Array(got);
+  let off = 0;
+  for (const c of chunks) { buf.set(c, off); off += c.length; }
+  return JSON.parse(new TextDecoder().decode(buf));
+}
+
 // ---------------------------------------------------------------- data load
 async function ensureGeo() {
   const def = MAPS[S.map];
   if (geoCache.has(S.map)) { geo = geoCache.get(S.map); return; }
   setStatus("加载地图数据…", "");
-  const [topo, regions] = await Promise.all([
-    fetch(def.file).then((r) => r.json()),
-    fetch(def.regions).then((r) => r.json()),
-  ]);
+  showLoading(def.label);
+  let topo, regions;
+  try {
+    [topo, regions] = await Promise.all([
+      fetchJSON(def.file, (pct) => setLoadingProgress(pct)),
+      fetch(def.regions).then((r) => r.json()),
+    ]);
+  } catch (err) {
+    hideLoading();
+    setStatus("", "");
+    $("#status").replaceChildren(
+      el("div", { class: "warn" }, `✗ 底图加载失败：${err.message}`),
+      el("div", { class: "" }, "检查网络后重选底图重试。")
+    );
+    throw err;
+  }
+  hideLoading();
   const fc = topojson.feature(topo, topo.objects[def.object]);
   const outline = def.outline
     ? topojson.mesh(topo, topo.objects[def.outline], (a, b) => a !== b || def.outline === "nation")

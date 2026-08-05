@@ -182,6 +182,30 @@ svg#map text.lbl {
   pointer-events: none; text-anchor: middle;
 }
 
+/* ---------- loading ---------- */
+.loading {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  background: color-mix(in srgb, var(--surface-1) 88%, transparent);
+  border-radius: var(--r); backdrop-filter: blur(1px);
+}
+.spinner {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2.5px solid var(--grid); border-top-color: var(--accent);
+  animation: spin 800ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 13px; color: var(--text-secondary); }
+.loading-bar { width: 210px; height: 4px; border-radius: 2px; background: var(--grid); overflow: hidden; }
+.loading-bar i { display: block; height: 100%; width: 0; border-radius: 2px; background: var(--accent); transition: width 140ms linear; }
+.loading-bar i.indeterminate { animation: slide 1.1s ease-in-out infinite; }
+@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.loading-pct { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 2.4s; }
+  .loading-bar i.indeterminate { animation: none; }
+}
+
 .tooltip {
   position: fixed; z-index: 40; pointer-events: none; opacity: 0;
   background: var(--surface-1); border: 1px solid var(--border-strong);
