@@ -1,6 +1,11 @@
 node_modules/
 shots/
 
+# Throwaway debugging probes. Kept on disk, deliberately not versioned —
+# they were written to answer one question and would rot as repo contents.
+build/probe*.mjs
+build/diag-*.mjs
+
 # Raw upstream sources — re-fetch with `npm run fetch`
 build/iso3166.json
 build/wiki_gdp.json
