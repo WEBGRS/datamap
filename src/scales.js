@@ -66,12 +66,12 @@ export function computeBreaks(values, { method = "quantile", n = 5, center = 0 }
     b.push(max);
     // Collapse duplicate edges (heavy ties) so no empty class survives.
     const uniq = b.filter((x, i) => i === 0 || x > b[i - 1]);
-    return { breaks: uniq, min, max, note: uniq.length - 1 < n ? `重复值过多，合并为 ${uniq.length - 1} 级` : "" };
+    return { breaks: uniq, min, max, note: uniq.length - 1 < n ? `重复值过多，合并为 ${uniq.length - 1} 级 / Too many ties, merged into ${uniq.length - 1} classes` : "" };
   }
   if (method === "jenks") {
     const b = jenksBreaks(vals, n);
     const uniq = b.filter((x, i) => i === 0 || x > b[i - 1]);
-    return { breaks: uniq, min, max, note: uniq.length - 1 < n ? `合并为 ${uniq.length - 1} 级` : "" };
+    return { breaks: uniq, min, max, note: uniq.length - 1 < n ? `合并为 ${uniq.length - 1} 级 / Merged into ${uniq.length - 1} classes` : "" };
   }
   if (method === "log") {
     const pos = vals.filter((v) => v > 0);
@@ -103,7 +103,7 @@ export function computeBreaks(values, { method = "quantile", n = 5, center = 0 }
       ...uniqTh.map((t) => center + t),
     ];
     const cls = b.length - 1;
-    return { breaks: b, min, max, note: cls < n ? `重复值过多，合并为 ${cls} 级` : "" };
+    return { breaks: b, min, max, note: cls < n ? `重复值过多，合并为 ${cls} 级 / Too many ties, merged into ${cls} classes` : "" };
   }
   return computeBreaks(values, { method: "quantile", n });
 }

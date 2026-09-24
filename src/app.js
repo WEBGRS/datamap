@@ -109,7 +109,7 @@ function showLoading(label) {
   if (!host || $("#loading")) return;
   host.append(el("div", { id: "loading", class: "loading" },
     el("div", { class: "spinner" }),
-    el("div", { class: "loading-text" }, `正在加载${label}底图…`),
+    el("div", { class: "loading-text" }, `正在加载${label}底图… Loading basemap…`),
     el("div", { class: "loading-bar" }, el("i", {})),
     el("div", { class: "loading-pct" }, "")));
 }
@@ -148,7 +148,7 @@ async function fetchJSON(url, onProgress) {
 async function ensureGeo() {
   const def = MAPS[S.map];
   if (geoCache.has(S.map)) { geo = geoCache.get(S.map); return; }
-  setStatus("加载地图数据…", "");
+  setStatus("加载地图数据… Loading map data…", "");
   showLoading(def.label);
   let topo, regions;
   try {
@@ -160,8 +160,8 @@ async function ensureGeo() {
     hideLoading();
     setStatus("", "");
     $("#status").replaceChildren(
-      el("div", { class: "warn" }, `✗ 底图加载失败：${err.message}`),
-      el("div", { class: "" }, "检查网络后重选底图重试。")
+      el("div", { class: "warn" }, `✗ 底图加载失败 Basemap failed to load: ${err.message}`),
+      el("div", { class: "" }, "检查网络后重选底图重试。Check your connection and pick the basemap again.")
     );
     throw err;
   }
@@ -221,7 +221,7 @@ async function onDataChanged() {
     selected = null;
     $("#mapSel").value = target;
     await ensureGeo();
-    autoNote = `已自动切换到「${MAPS[target].label}」`;
+    autoNote = `已自动切换到 Switched to「${MAPS[target].label}」`;
   } else autoNote = "";
   S._autoCols = true;
   refresh();
@@ -279,7 +279,7 @@ function renderMap() {
   const host = $("#mapWrap");
   const [, , VW, VH] = def.viewBox;
   const svg = el("svg", { id: "map", viewBox: `0 0 ${VW} ${VH}`, role: "img", preserveAspectRatio: "xMidYMid meet" });
-  svg.setAttribute("aria-label", (S.title || "数据地图") + "：" + describeForSR());
+  svg.setAttribute("aria-label", (S.title || "数据地图 DataMap") + ": " + describeForSR());
 
   let path, feats = geo.features;
   if (def.projected) {
@@ -362,7 +362,7 @@ function shortLabel(region, f) {
 
 function describeForSR() {
   const n = view.join.values.size;
-  return `${n} 个地区着色，范围 ${view.fmt(view.min)} 至 ${view.fmt(view.max)}`;
+  return `${n} 个地区着色，范围 ${view.fmt(view.min)} 至 ${view.fmt(view.max)} / ${n} regions colored, ${view.fmt(view.min)} to ${view.fmt(view.max)}`;
 }
 
 // ---------------------------------------------------------------- tooltip
@@ -380,7 +380,7 @@ function showTip(f, ev) {
     el("div", { class: "t-val" },
       el("i", { class: "t-chip", style: `background:${c || getCss("--nodata")}` }),
       Number.isFinite(v) ? view.fmt(v) : "无数据 no data"),
-    rank ? el("div", { class: "t-meta" }, `第 ${rank.i} / ${rank.n} 位`) : null
+    rank ? el("div", { class: "t-meta" }, `第 ${rank.i} / ${rank.n} 位 Rank`) : null
   );
   tip.style.opacity = "1";
   moveTip(ev);
@@ -425,10 +425,10 @@ function renderLegend() {
   const { breaks, colors, fmtTick: fmt } = view;
   const cvd = (hex) => (S.cvd === "none" ? hex : simulateCVD(hex, S.cvd));
   const kids = [];
-  const title = el("div", { class: "legend-title" }, S.unit ? `图例 · ${S.unit}` : "图例 Legend");
+  const title = el("div", { class: "legend-title" }, S.unit ? `图例 Legend · ${S.unit}` : "图例 Legend");
 
   if (!view.values.length) {
-    host.replaceChildren(el("div", { class: "lg-na" }, el("i", {}), "尚无数据 — 粘贴或选择一个示例数据集"));
+    host.replaceChildren(el("div", { class: "lg-na" }, el("i", {}), "尚无数据 — 粘贴或选择一个示例数据集 / No data yet: paste some or pick a sample"));
     return;
   }
   if (S.continuous) {
@@ -451,7 +451,7 @@ function renderLegend() {
     kids.push(el("div", {}, title, bins));
   }
   const missing = geo.features.filter((f) => !Number.isFinite(view.join.values.get(f.id))).length;
-  if (missing) kids.push(el("div", { class: "lg-na" }, el("i", {}), `无数据 ${missing}`));
+  if (missing) kids.push(el("div", { class: "lg-na" }, el("i", {}), `无数据 No data ${missing}`));
   if (view.note) kids.push(el("div", { class: "lg-na" }, view.note));
   host.replaceChildren(...kids);
 }
@@ -469,7 +469,7 @@ function renderTiles() {
   const nm = (id) => { const r = geo.index.byId.get(id); return r ? (r.zh || r.name) : id; };
   const tile = (k, v, sub) => el("dl", { class: "tile" }, el("dt", {}, k), el("dd", {}, v, sub ? el("small", {}, sub) : null));
   host.replaceChildren(
-    tile("覆盖 Coverage", `${vals.length}`, `共 ${geo.features.length} 个地区`),
+    tile("覆盖 Coverage", `${vals.length}`, `共 ${geo.features.length} 个地区 regions`),
     tile("最高 Max", view.fmt(view.max), topId ? nm(topId[0]) : ""),
     tile("最低 Min", view.fmt(view.min), botId ? nm(botId[0]) : ""),
     tile("中位数 Median", view.fmt(med), ""),
@@ -510,13 +510,13 @@ function renderTable() {
   const un = view.join.unmatched;
   if (un.length) {
     kids.push(el("div", { class: "unmatched" },
-      el("div", { style: "margin-bottom:5px" }, `⚠ ${un.length} 行未能匹配到地区（已跳过）：`),
+      el("div", { style: "margin-bottom:5px" }, `⚠ ${un.length} 行未能匹配到地区（已跳过）/ rows not matched (skipped):`),
       ...[...new Set(un)].slice(0, 60).map((u) => el("code", {}, u)),
-      un.length > 60 ? el("span", {}, ` …等 ${un.length} 行`) : null
+      un.length > 60 ? el("span", {}, ` …等 ${un.length} 行 rows`) : null
     ));
   }
   host.replaceChildren(...kids);
-  $("#tableCount").textContent = `${rows.length} 行` + (un.length ? ` · ${un.length} 未匹配` : "");
+  $("#tableCount").textContent = `${rows.length} 行 rows` + (un.length ? ` · ${un.length} 未匹配 unmatched` : "");
 }
 function highlightRow(id) {
   const tv = $("#tableView");
@@ -674,8 +674,8 @@ function buildPanel() {
 
   // --- display ---
   const fmtSel = el("select", { onchange: (e) => { S.fmtStyle = e.target.value; refresh(); } },
-    ...[["auto", "自动 Auto"], ["number", "整数 Number"], ["compact", "紧凑 1.2M"], ["percent", "百分比 %"], ["currency", "货币 $"]].map(([v, l]) => opt(v, l, S.fmtStyle)));
-  const decInput = el("input", { type: "number", min: "0", max: "6", placeholder: "自动", value: S.decimals,
+    ...[["auto", "自动 Auto"], ["number", "整数 Number"], ["compact", "紧凑 Compact 1.2M"], ["percent", "百分比 Percent %"], ["currency", "货币 Currency $"]].map(([v, l]) => opt(v, l, S.fmtStyle)));
+  const decInput = el("input", { type: "number", min: "0", max: "6", placeholder: "自动 Auto", value: S.decimals,
     oninput: debounce((e) => { S.decimals = e.target.value; refresh(); }, 250) });
   const unitInput = el("input", { type: "text", placeholder: "如 亿美元 / people", value: S.unit,
     oninput: debounce((e) => { S.unit = e.target.value; refresh(); }, 250) });
@@ -684,13 +684,13 @@ function buildPanel() {
   const cvdSel = el("select", { onchange: (e) => { S.cvd = e.target.value; refresh(); } },
     ...[["none", "正常视觉 Normal"], ["protanopia", "红色盲 Protanopia"], ["deuteranopia", "绿色盲 Deuteranopia"], ["tritanopia", "蓝色盲 Tritanopia"]].map(([v, l]) => opt(v, l, S.cvd)));
   const themeSeg = el("div", { class: "seg" },
-    ...[["auto", "跟随系统"], ["light", "浅色"], ["dark", "深色"]].map(([k, l]) =>
+    ...[["auto", "跟随系统 System"], ["light", "浅色 Light"], ["dark", "深色 Dark"]].map(([k, l]) =>
       el("button", { type: "button", "data-t": k, "aria-pressed": String(S.theme === k),
         onclick: () => { S.theme = k; applyTheme(); refresh(); } }, l)));
 
   p.replaceChildren(
     el("div", { class: "brand" }, el("h1", {}, "DataMap 数据地图"), el("span", {}, "v1")),
-    el("p", { class: "tagline" }, "粘贴任意「地区 + 数值」两列数据，立刻得到一张配色合规的分级统计地图。"),
+    el("p", { class: "tagline" }, "粘贴任意「地区 + 数值」两列数据，立刻得到一张配色合规的分级统计地图。Paste any two columns (region + value) and get a well-colored choropleth map."),
 
     group("地图 Map", field("底图 Basemap", mapSel), worldOnly),
 
@@ -698,8 +698,8 @@ function buildPanel() {
       field("示例数据 Samples", sampleSel),
       field("粘贴数据 Paste", raw),
       el("div", { class: "btn-row" },
-        el("button", { class: "btn", type: "button", onclick: () => $("#file").click() }, "上传文件"),
-        el("button", { class: "btn ghost", type: "button", onclick: () => { S.raw = ""; $("#raw").value = ""; autoNote = ""; refresh(); } }, "清空"),
+        el("button", { class: "btn", type: "button", onclick: () => $("#file").click() }, "上传文件 Upload"),
+        el("button", { class: "btn ghost", type: "button", onclick: () => { S.raw = ""; $("#raw").value = ""; autoNote = ""; refresh(); } }, "清空 Clear"),
         fileBtn),
       el("div", { class: "row", style: "margin-top:10px" },
         field("地区列 Region", keySel),
@@ -721,7 +721,7 @@ function buildPanel() {
       field("地图标签 Labels", labelSel),
       field("色觉模拟 CVD preview", cvdSel),
       field("主题 Theme", themeSeg),
-      el("p", { class: "hint" }, "色觉模拟仅改变预览，不改变导出的原始配色。"))
+      el("p", { class: "hint" }, "色觉模拟仅改变预览，不改变导出的原始配色。Color-vision simulation only affects the preview, not the export."))
   );
   syncInputs();
 }
@@ -785,14 +785,14 @@ function reportStatus() {
   const total = geo.features.length;
   const kids = [];
   if (autoNote) kids.push(el("div", { class: "ok" }, "↔ " + autoNote));
-  if (!view.parsed.rows.length) kids.push(el("div", { class: "" }, "等待数据…"));
+  if (!view.parsed.rows.length) kids.push(el("div", { class: "" }, "等待数据… Waiting for data…"));
   else {
-    kids.push(el("div", { class: "ok" }, `✓ 已匹配 ${matched.length} 行 → ${view.join.values.size} 个地区（共 ${total}）`));
+    kids.push(el("div", { class: "ok" }, `✓ 已匹配 Matched ${matched.length} 行 rows → ${view.join.values.size} 个地区 regions（共 of ${total}）`));
     if (unmatched.length) {
       kids.push(el("div", { class: "warn", onclick: () => { $("#tableView").open = true; $("#tableView").scrollIntoView({ behavior: "smooth" }); } },
-        `⚠ ${unmatched.length} 行未匹配 — 点击查看`));
+        `⚠ ${unmatched.length} 行未匹配 rows unmatched — 点击查看 click to view`));
     }
-    if (duplicates.length) kids.push(el("div", { class: "warn" }, `⚠ ${duplicates.length} 个重复地区，取最后一次出现的值`));
+    if (duplicates.length) kids.push(el("div", { class: "warn" }, `⚠ ${duplicates.length} 个重复地区，取最后一次出现的值 / duplicate regions, last value kept`));
   }
   $("#status").replaceChildren(...kids);
 }

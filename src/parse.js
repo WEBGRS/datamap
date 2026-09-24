@@ -94,7 +94,7 @@ export function parseTable(text) {
     const avgBody = bodyNumeric.reduce((a, b) => a + b, 0) / bodyNumeric.length;
     header = firstNumeric < avgBody || (firstNumeric === 0 && avgBody === 0 && body.length > 1 && /name|region|state|country|value|地区|名称|省|州|国家|数值/i.test(first.join(" ")));
   }
-  const columns = header ? first.map((h, i) => h || `列${i + 1}`) : first.map((_, i) => `列${i + 1}`);
+  const columns = header ? first.map((h, i) => h || `列 Col ${i + 1}`) : first.map((_, i) => `列 Col ${i + 1}`);
   const rows = header ? body : cells;
   return { columns, rows, delimiter: delim, headerUsed: header };
 }

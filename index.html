@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DataMap 数据地图 · 任意数据 → 分级统计地图</title>
-<meta name="description" content="粘贴任意「地区 + 数值」数据，生成美国各州 / 各县 / 世界各国的分级统计地图（choropleth）。">
+<title>DataMap 数据地图 · Any data → choropleth map</title>
+<meta name="description" content="Paste any region + value data and get a choropleth map of US states, US counties, or world countries. 粘贴任意「地区 + 数值」数据，生成分级统计地图。">
 <link rel="stylesheet" href="src/styles.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Crect x='5' y='16' width='7' height='11' rx='1.5' fill='%23cde2fb'/%3E%3Crect x='13' y='10' width='7' height='17' rx='1.5' fill='%2386b6ef'/%3E%3Crect x='21' y='5' width='7' height='22' rx='1.5' fill='%23fcfcfb'/%3E%3C/svg%3E">
 </head>
@@ -15,8 +15,8 @@
   <main class="stage">
     <div class="stage-head">
       <div class="titles">
-        <input id="chartTitle" placeholder="图表标题 Chart title" aria-label="图表标题">
-        <input id="chartSub" placeholder="副标题 / 说明 Subtitle" aria-label="副标题">
+        <input id="chartTitle" placeholder="图表标题 Chart title" aria-label="Chart title">
+        <input id="chartSub" placeholder="副标题 / 说明 Subtitle" aria-label="Subtitle">
       </div>
       <div class="toolbar">
         <button class="btn" id="btnPNG" type="button">PNG</button>
@@ -32,7 +32,7 @@
     <div class="legend" id="legend"></div>
 
     <div class="foot">
-      <input id="sourceInput" placeholder="数据来源 Source（可选）" aria-label="数据来源">
+      <input id="sourceInput" placeholder="数据来源 Source（可选）" aria-label="Source">
     </div>
 
     <details class="tableview" id="tableView">
