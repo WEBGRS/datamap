@@ -689,8 +689,7 @@ function buildPanel() {
         onclick: () => { S.theme = k; applyTheme(); refresh(); } }, l)));
 
   p.replaceChildren(
-    el("div", { class: "brand" }, el("h1", {}, "DataMap 数据地图"), el("span", {}, "v1")),
-    el("p", { class: "tagline" }, "粘贴任意「地区 + 数值」两列数据，立刻得到一张配色合规的分级统计地图。Paste any two columns (region + value) and get a well-colored choropleth map."),
+    el("div", { class: "brand" }, el("h1", {}, "DataMap 数据地图")),
 
     group("地图 Map", field("底图 Basemap", mapSel), worldOnly),
 
@@ -720,8 +719,7 @@ function buildPanel() {
       el("div", { class: "row" }, field("小数位 Decimals", decInput), field("单位 Unit", unitInput)),
       field("地图标签 Labels", labelSel),
       field("色觉模拟 CVD preview", cvdSel),
-      field("主题 Theme", themeSeg),
-      el("p", { class: "hint" }, "色觉模拟仅改变预览，不改变导出的原始配色。Color-vision simulation only affects the preview, not the export."))
+      field("主题 Theme", themeSeg))
   );
   syncInputs();
 }
